@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[180]:
 
 
 # Various Imports
@@ -23,7 +23,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 
-# In[168]:
+# In[181]:
 
 
 # Preprocessing Data 
@@ -51,7 +51,7 @@ for i in tqdm(range(0, 1), desc ="Pre-processing Data", colour="#35AF92"):
     y_test=y_test.view(y_test.shape[0],1)
 
 
-# In[169]:
+# In[182]:
 
 
 # Defining Dataset
@@ -82,7 +82,7 @@ class CreditTestDataset(Dataset):
 print(x_train.shape)
 
 
-# In[170]:
+# In[183]:
 
 
 # Loading Data
@@ -94,7 +94,7 @@ for i in tqdm(range(0, 1), desc ="Loading Data", colour="#26B69C"):
     test_data=DataLoader(dataset=test,batch_size=1)
 
 
-# In[171]:
+# In[184]:
 
 
 # Defining Model
@@ -116,16 +116,16 @@ class CreditNet(nn.Module):
         return out
 
 
-# In[172]:
+# In[ ]:
 
 
 # Model Parameters
 
 device=torch.device("cuda")
-learning_rate=0.5
 nepochs=10
 input_size=x_train.shape[1]
 output_size=1
+learning_rate=0.3
 
 model=CreditNet(input_size,output_size).to(device)
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
