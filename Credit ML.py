@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[13]:
+# In[3]:
 
 
 # Various Imports
@@ -23,16 +23,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 
-# In[14]:
+# In[168]:
 
 
 # Preprocessing Data 
 
 for i in tqdm(range(0, 1), desc ="Pre-processing Data", colour="#35AF92"):
-    data=pd.read_csv("D:/chrome download/credit data/application_train.csv",skiprows=1).dropna()
+    data=pd.read_csv("D:/chrome download/credit data/application_train.csv",skiprows=1).dropna(axis=1)
     data=pd.get_dummies(data)
     sdtr=StandardScaler()
-    x_train,x_test,y_train,y_test=train_test_split(data.iloc[1:1000,2:],data.iloc[1:1000,1],test_size=0.2,random_state=0)
+    start_row=1
+    end_row=100000
+    x_train,x_test,y_train,y_test=train_test_split(data.iloc[:,2:],data.iloc[:,1],test_size=0.2,random_state=0)
         
     x_train=sdtr.fit_transform(x_train)
     x_test=sdtr.transform(x_test)
@@ -49,7 +51,7 @@ for i in tqdm(range(0, 1), desc ="Pre-processing Data", colour="#35AF92"):
     y_test=y_test.view(y_test.shape[0],1)
 
 
-# In[15]:
+# In[169]:
 
 
 # Defining Dataset
@@ -76,22 +78,23 @@ class CreditTestDataset(Dataset):
     
     def __len__(self):
         return self.x_test.shape[0]
-    
+
+print(x_train.shape)
 
 
-# In[16]:
+# In[170]:
 
 
 # Loading Data
 
 for i in tqdm(range(0, 1), desc ="Loading Data", colour="#26B69C"):
     train=CreditTrainDataset(x_train,y_train)
-    train_data=DataLoader(dataset=train,batch_size=5)
+    train_data=DataLoader(dataset=train,batch_size=1)
     test=CreditTestDataset(x_test,y_test)
-    test_data=DataLoader(dataset=test,batch_size=2)
+    test_data=DataLoader(dataset=test,batch_size=1)
 
 
-# In[23]:
+# In[171]:
 
 
 # Defining Model
@@ -113,7 +116,7 @@ class CreditNet(nn.Module):
         return out
 
 
-# In[31]:
+# In[172]:
 
 
 # Model Parameters
@@ -122,30 +125,37 @@ device=torch.device("cuda")
 learning_rate=0.5
 nepochs=10
 input_size=x_train.shape[1]
-output_size=2
+output_size=1
 
 model=CreditNet(input_size,output_size).to(device)
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 LossFunction = nn.MSELoss()
 
 
-# In[33]:
+# In[ ]:
 
 
 #Traning Model
 
 loss_history = []
 for epoch in tqdm(range(nepochs),desc="Epoch",colour="#26B69C"):
-    for (data,label) in tqdm(train,desc="iter",colour="#26B69C"):
+    for data,label in tqdm(train,colour="#26B69C",mininterval=5):
         optimizer.zero_grad()
         data = data.to(device)
-        label = label.to(device)
-        out = model(data)
-        loss = LossFunction(out, label)
+        label = label.to(device).view(-1,1)
+        out = model(data).view(-1,1)
+        loss = LossFunction(out,label)
         loss.backward()
         optimizer.step()
         loss_history.append(loss.item())
+    print(out,label)
     print(f"Epoch {epoch}: loss: {loss.item()}")
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
